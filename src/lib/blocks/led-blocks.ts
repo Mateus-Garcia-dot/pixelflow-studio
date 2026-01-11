@@ -7,10 +7,14 @@ export async function defineLEDToolBox() {
     await defineRunForeverBlock();
     await defineDelayBlock();
     await defineRepeatBlock();
-    await defineMoveLEDBlock();
     await defineForEachPositionBlock();
     await defineMathBlock();
     await defineNumberBlock();
+    await defineMathSingleBlock();
+    await defineMathModuloBlock();
+    await defineMathRandomBlock();
+    await defineMathMinMaxBlock();
+    await defineConstantBlocks();
 }
 
 async function defineHuePickerBlock() {
@@ -63,10 +67,10 @@ async function defineSetLEDBlock() {
         init: function () {
             this.appendValueInput('LED_NUM')
                 .setCheck('Number')
-                .appendField("Set LED");
+                .appendField("Set LED position");
             this.appendValueInput('COLOR')
                 .setCheck('Colour')
-                .appendField("to");
+                .appendField("tint");
             this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
@@ -82,13 +86,16 @@ async function defineSetLEDRangeBlock() {
     
     Blockly.Blocks['led_set_range'] = {
         init: function () {
+            this.appendValueInput('START')
+                .setCheck('Number')
+                .appendField("Set LED position from");
+            this.appendValueInput('END')
+                .setCheck('Number')
+                .appendField("to");
             this.appendValueInput('COLOR')
                 .setCheck('Colour')
-                .appendField("Set LEDs")
-                .appendField(new Blockly.FieldNumber(0, 0, 255), 'START')
-                .appendField("to")
-                .appendField(new Blockly.FieldNumber(10, 0, 255), 'END')
-                .appendField("to");
+                .appendField("tint");
+            this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
             this.setColour(230);
@@ -105,7 +112,7 @@ async function defineSetAllLEDsBlock() {
         init: function () {
             this.appendValueInput('COLOR')
                 .setCheck('Colour')
-                .appendField("Set All LEDs to");
+                .appendField("Set all LEDs tint");
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
             this.setColour(230);
@@ -136,10 +143,12 @@ async function defineDelayBlock() {
     
     Blockly.Blocks['delay'] = {
         init: function () {
+            this.appendValueInput('MILLISECONDS')
+                .setCheck('Number')
+                .appendField("Delay");
             this.appendDummyInput()
-                .appendField("Delay")
-                .appendField(new Blockly.FieldNumber(1000, 0), 'MILLISECONDS')
                 .appendField("ms");
+            this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
             this.setColour(290);
@@ -167,27 +176,6 @@ async function defineRepeatBlock() {
     };
 }
 
-async function defineMoveLEDBlock() {
-    const Blockly = await import('blockly');
-    
-    Blockly.Blocks['move_led'] = {
-        init: function () {
-            this.appendValueInput('COLOR')
-                .setCheck('Colour')
-                .appendField("Move LED from")
-                .appendField(new Blockly.FieldNumber(0, 0, 255), 'FROM')
-                .appendField("to")
-                .appendField(new Blockly.FieldNumber(10, 0, 255), 'TO')
-                .appendField("with");
-            this.setPreviousStatement(true, null);
-            this.setNextStatement(true, null);
-            this.setColour(330);
-            this.setTooltip('Move an LED from one position to another');
-            this.setHelpUrl('');
-        }
-    };
-}
-
 async function defineForEachPositionBlock() {
     const Blockly = await import('blockly');
     
@@ -196,12 +184,15 @@ async function defineForEachPositionBlock() {
             this.appendDummyInput()
                 .appendField("For each")
                 .appendField(new Blockly.FieldVariable('position'), 'VAR')
-                .appendField("in range")
-                .appendField(new Blockly.FieldNumber(0, 0, 255), 'FROM')
-                .appendField("to")
-                .appendField(new Blockly.FieldNumber(10, 0, 255), 'TO');
+                .appendField("in range");
+            this.appendValueInput('FROM')
+                .setCheck('Number');
+            this.appendValueInput('TO')
+                .setCheck('Number')
+                .appendField("to");
             this.appendStatementInput('DO')
                 .appendField("do");
+            this.setInputsInline(true);
             this.setPreviousStatement(true, null);
             this.setNextStatement(true, null);
             this.setColour(120);
@@ -224,7 +215,8 @@ async function defineMathBlock() {
                     ['+', 'ADD'],
                     ['-', 'SUBTRACT'],
                     ['×', 'MULTIPLY'],
-                    ['÷', 'DIVIDE']
+                    ['÷', 'DIVIDE'],
+                    ['^', 'POWER']
                 ]), 'OP');
             this.setInputsInline(true);
             this.setOutput(true, 'Number');
@@ -245,6 +237,105 @@ async function defineNumberBlock() {
             this.setOutput(true, 'Number');
             this.setColour(230);
             this.setTooltip('A number');
+            this.setHelpUrl('');
+        }
+    };
+}
+
+async function defineMathSingleBlock() {
+    const Blockly = await import('blockly');
+    
+    Blockly.Blocks['math_single'] = {
+        init: function () {
+            this.appendValueInput('NUM')
+                .setCheck('Number')
+                .appendField(new Blockly.FieldDropdown([
+                    ['abs', 'ABS'],
+                    ['round', 'ROUND'],
+                    ['floor', 'FLOOR'],
+                    ['ceiling', 'CEILING']
+                ]), 'OP');
+            this.setInputsInline(true);
+            this.setOutput(true, 'Number');
+            this.setColour(230);
+            this.setTooltip('Single number operations');
+            this.setHelpUrl('');
+        }
+    };
+}
+
+async function defineMathModuloBlock() {
+    const Blockly = await import('blockly');
+    
+    Blockly.Blocks['math_modulo'] = {
+        init: function () {
+            this.appendValueInput('DIVIDEND')
+                .setCheck('Number');
+            this.appendValueInput('DIVISOR')
+                .setCheck('Number')
+                .appendField('%');
+            this.setInputsInline(true);
+            this.setOutput(true, 'Number');
+            this.setColour(230);
+            this.setTooltip('Remainder of division (modulo)');
+            this.setHelpUrl('');
+        }
+    };
+}
+
+async function defineMathRandomBlock() {
+    const Blockly = await import('blockly');
+    
+    Blockly.Blocks['math_random'] = {
+        init: function () {
+            this.appendValueInput('FROM')
+                .setCheck('Number')
+                .appendField("random from");
+            this.appendValueInput('TO')
+                .setCheck('Number')
+                .appendField("to");
+            this.setInputsInline(true);
+            this.setOutput(true, 'Number');
+            this.setColour(230);
+            this.setTooltip('Random number between two values');
+            this.setHelpUrl('');
+        }
+    };
+}
+
+async function defineMathMinMaxBlock() {
+    const Blockly = await import('blockly');
+    
+    Blockly.Blocks['math_minmax'] = {
+        init: function () {
+            this.appendValueInput('A')
+                .setCheck('Number')
+                .appendField(new Blockly.FieldDropdown([
+                    ['min', 'MIN'],
+                    ['max', 'MAX']
+                ]), 'OP');
+            this.appendValueInput('B')
+                .setCheck('Number')
+                .appendField('of');
+            this.setInputsInline(true);
+            this.setOutput(true, 'Number');
+            this.setColour(230);
+            this.setTooltip('Minimum or maximum of two numbers');
+            this.setHelpUrl('');
+        }
+    };
+}
+
+async function defineConstantBlocks() {
+    const Blockly = await import('blockly');
+    
+    Blockly.Blocks['constant_last'] = {
+        init: function () {
+            this.appendDummyInput()
+                .appendField("LAST");
+            this.setOutput(true, 'Number');
+            this.setColour(210);
+            this.setTooltip('Last LED position (255)');
             this.setHelpUrl('');
         }
     };
@@ -279,11 +370,11 @@ export const ledToolbox = {
                 },
                 {
                     kind: 'block',
-                    type: 'led_set_range'
+                    type: 'led_set_all'
                 },
                 {
                     kind: 'block',
-                    type: 'led_set_all'
+                    type: 'led_set_range'
                 }
             ]
         },
@@ -324,6 +415,10 @@ export const ledToolbox = {
                             }
                         }
                     }
+                },
+                {
+                    kind: 'block',
+                    type: 'constant_last'
                 }
             ]
         },
@@ -345,17 +440,22 @@ export const ledToolbox = {
                 {
                     kind: 'block',
                     type: 'math_arithmetic'
-                }
-            ]
-        },
-        {
-            kind: 'category',
-            name: 'Movement',
-            colour: '210',
-            contents: [
+                },
                 {
                     kind: 'block',
-                    type: 'move_led'
+                    type: 'math_modulo'
+                },
+                {
+                    kind: 'block',
+                    type: 'math_single'
+                },
+                {
+                    kind: 'block',
+                    type: 'math_random'
+                },
+                {
+                    kind: 'block',
+                    type: 'math_minmax'
                 }
             ]
         }
